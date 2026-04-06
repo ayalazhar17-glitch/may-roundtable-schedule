@@ -159,9 +159,9 @@
     </section>
   </main>
 
-  <footer class="mx-auto w-full max-w-7xl px-4 pb-8 md:px-8">
+      <footer class="mx-auto w-full max-w-7xl px-4 pb-8 md:px-8">
     <div class="border-4 border-ink bg-white px-5 py-4 text-sm leading-6 shadow-card">
-      Organizer notifications and slot locking are handled by the backend. If SMTP or Twilio credentials are configured, this page can email and text the organizer automatically after each booking.
+      Slot locking is shared across everyone who opens the site. If Resend or Twilio credentials are configured, each booking can also notify the organizer instantly.
     </div>
   </footer>
 
@@ -220,14 +220,22 @@
     }
 
     async function fetchSlots() {
-      const response = await fetch("/api/slots");
-      const data = await response.json();
-      state.slots = data.slots || [];
-      const available = state.slots.find((slot) => slot.status === "available");
-      if (!state.selectedSlotId || !state.slots.some((slot) => slot.id === state.selectedSlotId)) {
-        state.selectedSlotId = available ? available.id : null;
+      try {
+        const response = await fetch("/api/slots");
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Could not load the schedule.");
+        }
+        state.slots = data.slots || [];
+        const available = state.slots.find((slot) => slot.status === "available");
+        if (!state.selectedSlotId || !state.slots.some((slot) => slot.id === state.selectedSlotId)) {
+          state.selectedSlotId = available ? available.id : null;
+        }
+        render();
+      } catch (error) {
+        document.getElementById("slotList").innerHTML = `<div class="border-4 border-dashed border-ink bg-paper p-5 text-sm leading-7 text-black/70">${error.message}</div>`;
+        document.getElementById("statusText").textContent = error.message;
       }
-      render();
     }
 
     function renderSlotCards() {
@@ -359,21 +367,25 @@
         notes: document.getElementById("notes").value.trim()
       };
 
-      const response = await fetch("/api/book", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        renderConfirmationBox(data.error || "Booking failed.");
-        return;
-      }
+      try {
+        const response = await fetch("/api/book", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          renderConfirmationBox(data.error || "Booking failed.");
+          return;
+        }
 
-      await fetchSlots();
-      renderConfirmationBox(`Confirmed for ${data.registration.slot.venue} on ${formatDate(data.registration.slot.date)} at ${data.registration.slot.time}.`);
-      document.getElementById("modalOverlay").classList.remove("hidden");
-      document.getElementById("modalOverlay").classList.add("flex");
+        await fetchSlots();
+        renderConfirmationBox(`Confirmed for ${data.registration.slot.venue} on ${formatDate(data.registration.slot.date)} at ${data.registration.slot.time}.`);
+        document.getElementById("modalOverlay").classList.remove("hidden");
+        document.getElementById("modalOverlay").classList.add("flex");
+      } catch (error) {
+        renderConfirmationBox(error.message || "Booking failed.");
+      }
     }
 
     function copyText(text, successMessage) {

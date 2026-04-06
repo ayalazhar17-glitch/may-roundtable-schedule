@@ -1,177 +1,153 @@
 # May Roundtable Schedule
 
-A ready-to-deploy scheduling app for attorneys and lenders.
+A shareable scheduling site for attorneys and lenders, now prepared for `Vercel + Supabase`.
 
 ## What it includes
 
 - Public booking page at `/`
-- One-slot-per-registration booking flow
-- Automatic slot locking to prevent double booking
-- SQLite database storage
-- Organizer email notification support
-- Organizer SMS notification support through Twilio
-- Optional confirmation email to the person who booked
-- Admin panel at `/admin.html`
-- Admin slot management without editing code
+- Admin page at `/admin.html`
+- One-slot-per-registration flow
+- Shared slot locking so everyone sees booked dates update
+- Admin login with a private PIN
+- Slot management without editing code
+- Optional organizer email notifications through Resend
+- Optional organizer SMS notifications through Twilio
+- Optional confirmation email to the attendee
 
-## Local run
+## Project structure
 
-```bash
-python3 app.py
-```
+- `/index.html` public booking page
+- `/admin.html` admin dashboard
+- `/api/*` Vercel serverless routes
+- `/supabase/schema.sql` database tables, booking function, and starter slots
+- `/vercel.json` Vercel runtime config
+- `/.env.example` required environment variables
 
-Open:
+## Required accounts
 
-- Public booking page: `http://127.0.0.1:8000`
-- Admin page: `http://127.0.0.1:8000/admin.html`
+To make this live with a public link, you need:
 
-Default admin PIN:
+1. A `Supabase` project
+2. A `Vercel` account
 
-```text
-changeme
-```
+Optional:
 
-Set a real PIN before deployment.
+- `Resend` for email notifications
+- `Twilio` for SMS notifications
 
-## Environment variables
+## Supabase setup
 
-### Required for production
+1. Create a new Supabase project.
+2. Open the `SQL Editor`.
+3. Copy everything from [`supabase/schema.sql`](/Users/ayalazhar/Documents/New%20project/supabase/schema.sql).
+4. Run it once.
 
-```bash
-export ADMIN_PIN="your-secure-pin"
-```
+That creates:
 
-### Optional SMTP email notifications
+- the `slots` table
+- the `registrations` table
+- the `book_slot` function that prevents double booking
+- your five default May roundtable slots
 
-```bash
-export SMTP_HOST="smtp.your-provider.com"
-export SMTP_PORT="587"
-export SMTP_USERNAME="smtp-user"
-export SMTP_PASSWORD="smtp-password"
-export SMTP_USE_TLS="true"
-export FROM_EMAIL="scheduler@yourdomain.com"
-export ORGANIZER_EMAIL="organizer@yourdomain.com"
-```
+## Vercel environment variables
 
-### Optional confirmation email to the user
+Set these in Vercel before deploying:
 
-```bash
-export SEND_USER_CONFIRMATION="true"
-```
+### Required
 
-### Optional Twilio SMS notifications
+- `ADMIN_PIN`
+- `ADMIN_SESSION_SECRET`
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
 
-```bash
-export TWILIO_ACCOUNT_SID="AC..."
-export TWILIO_AUTH_TOKEN="..."
-export TWILIO_FROM_NUMBER="+15555555555"
-export TWILIO_TO_NUMBER="+15555555555"
-```
+### Strongly recommended
+
+- `ORGANIZER_EMAIL`
+
+### Optional for email
+
+- `FROM_EMAIL`
+- `RESEND_API_KEY`
+- `SEND_USER_CONFIRMATION`
+
+### Optional for SMS
+
+- `TWILIO_ACCOUNT_SID`
+- `TWILIO_AUTH_TOKEN`
+- `TWILIO_FROM_NUMBER`
+- `TWILIO_TO_NUMBER`
+
+Use [`.env.example`](/Users/ayalazhar/Documents/New%20project/.env.example) as your checklist.
 
 ## How booking works
 
-1. The public page loads all slots from SQLite.
-2. A user selects one available slot.
-3. The form collects:
-   - Full Name
-   - Email Address
-   - Optional Company / Role
-   - Attending role
-   - Optional notes
-4. On submit, the backend:
-   - verifies the slot is still available
-   - creates the registration
-   - marks the slot as booked
-   - sends organizer email if SMTP is configured
-   - sends organizer SMS if Twilio is configured
-   - optionally sends a confirmation email to the user
+1. The public site loads slots from Supabase.
+2. A visitor selects one available slot.
+3. They submit:
+   - full name
+   - email
+   - optional company / role
+   - attendee type
+   - optional notes
+4. The `/api/book` route calls the `book_slot` database function.
+5. That function locks the selected slot and marks it booked.
+6. The site refreshes so nobody else can claim the same time.
 
 ## Admin workflow
 
 1. Open `/admin.html`
 2. Enter the admin PIN
 3. Add, edit, or delete slots
-4. Review registrations in the table
+4. Review booked attendees
 
-## Render deployment
+## Deploy to Vercel
 
-This app is ready for Render.
+1. Push this repo to GitHub.
+2. In Vercel, click `Add New...` -> `Project`.
+3. Import this GitHub repository.
+4. Vercel will detect the app automatically.
+5. Add the environment variables listed above.
+6. Deploy.
 
-### Files already included
+After deploy, Vercel gives you a public link like:
 
-- `render.yaml`
-- `requirements.txt`
-- `.gitignore`
+```text
+https://may-roundtable-schedule.vercel.app
+```
 
-### Important production note
+## Important note about your current GitHub repo
 
-Bookings are stored in SQLite, so Render should use a persistent disk.
-The included `render.yaml` already mounts a disk at `/var/data` and points the app there through `DATA_DIR=/var/data`.
+If `scheduler.db` is still in GitHub from the earlier upload, delete it from the repo before your final deploy. The new version uses Supabase instead of SQLite.
 
-### Deploy steps
+## Optional notification setup
 
-1. Push this project to GitHub.
-2. In Render, choose:
-   - `New` -> `Blueprint`
-   - select your repository
-3. Render will read `render.yaml` automatically.
-4. Set these secret environment variables in Render:
-   - `ADMIN_PIN`
+### Resend
+
+If you want organizer emails:
+
+1. Create a Resend account
+2. Verify a sender domain or sender address
+3. Set:
+   - `RESEND_API_KEY`
+   - `FROM_EMAIL`
    - `ORGANIZER_EMAIL`
-   - optional SMTP values
-   - optional Twilio values
-5. Deploy.
 
-After deploy, Render will give you a public URL such as:
+If `SEND_USER_CONFIRMATION=true`, the attendee also gets a confirmation email.
 
-```text
-https://may-roundtable-schedule.onrender.com
-```
+### Twilio
 
-### Admin access after deploy
+If you want organizer text alerts:
 
-- Public booking page: `/`
-- Admin page: `/admin.html`
+1. Create a Twilio account
+2. Buy or verify a sending number
+3. Set:
+   - `TWILIO_ACCOUNT_SID`
+   - `TWILIO_AUTH_TOKEN`
+   - `TWILIO_FROM_NUMBER`
+   - `TWILIO_TO_NUMBER`
 
-## Deployment notes
+## Notes
 
-This app uses only Python standard library modules, so it can deploy anywhere you can run Python 3.9+.
-
-### Simple VPS or server
-
-Run:
-
-```bash
-python3 app.py
-```
-
-For production, place it behind Nginx or Caddy and run it with a process manager such as:
-
-- `systemd`
-- `supervisord`
-- `pm2` running the Python command
-
-### Example reverse proxy flow
-
-1. Point your domain to the server
-2. Run the app on port `8000`
-3. Proxy traffic from Nginx/Caddy to `127.0.0.1:8000`
-4. Set environment variables for admin, email, and SMS
-
-## Database
-
-The app creates `scheduler.db` automatically in the configured data directory.
-
-Local default:
-
-```text
-./scheduler.db
-```
-
-Render default from `render.yaml`:
-
-```text
-/var/data/scheduler.db
-```
-
-If you want PostgreSQL later, the fastest upgrade path is swapping the SQLite queries in `app.py` for a Postgres driver while keeping the same HTTP API and front end.
+- The old Render and SQLite setup has been removed from the app code.
+- Slot locking now depends on the Supabase SQL function, not local files.
+- Vercel CLI is not required. You can deploy entirely from the Vercel website.
