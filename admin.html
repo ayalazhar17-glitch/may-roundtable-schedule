@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheduler Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            paper: "#f4efe6",
+            ink: "#161616",
+            rust: "#db5d36",
+            sand: "#ead8bc",
+            cobalt: "#4567ff",
+            blush: "#f5d6db"
+          },
+          boxShadow: {
+            brutal: "10px 10px 0 #161616",
+            card: "7px 7px 0 rgba(22,22,22,0.95)"
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-paper text-ink">
+  <header class="border-b-4 border-ink bg-white">
+    <nav class="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-8">
+      <a href="/index.html" class="border-4 border-ink bg-sand px-3 py-2 text-xs font-black uppercase tracking-[0.2em] shadow-card">Back to booking page</a>
+      <button id="logoutBtn" class="border-4 border-ink bg-rust px-3 py-2 text-sm font-black uppercase tracking-[0.12em] text-white shadow-card transition hover:-translate-y-1">Logout</button>
+    </nav>
+  </header>
+
+  <main class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 md:px-8">
+    <section id="loginPanel" class="max-w-xl border-4 border-ink bg-white p-6 shadow-brutal">
+      <p class="text-xs font-black uppercase tracking-[0.24em] text-rust">Admin access</p>
+      <h1 class="mt-3 text-4xl font-black uppercase leading-none">Manage slots without touching code.</h1>
+      <p class="mt-4 text-sm leading-6 text-black/70">Use the admin PIN to unlock slot management and registration records.</p>
+      <form id="loginForm" class="mt-6 grid gap-3">
+        <label class="text-xs font-black uppercase tracking-[0.22em]" for="adminPin">Admin PIN</label>
+        <input id="adminPin" type="password" class="min-h-[52px] border-4 border-ink bg-paper px-4 outline-none transition focus:-translate-y-1" required>
+        <button type="submit" class="mt-2 border-4 border-ink bg-cobalt px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-card transition hover:-translate-y-1">Unlock admin</button>
+      </form>
+      <p id="loginStatus" class="mt-4 text-sm font-bold text-black/70">Not signed in.</p>
+    </section>
+
+    <section id="adminPanel" class="hidden grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+      <section class="border-4 border-ink bg-white p-5 shadow-brutal md:p-6">
+        <p class="text-xs font-black uppercase tracking-[0.24em] text-rust">Slot manager</p>
+        <h2 class="mt-3 text-3xl font-black uppercase leading-none">Add or update dates</h2>
+        <form id="slotForm" class="mt-5 grid gap-3">
+          <input type="hidden" id="slotId">
+          <div>
+            <label class="block text-xs font-black uppercase tracking-[0.22em]" for="slotDate">Date</label>
+            <input id="slotDate" type="date" class="mt-2 min-h-[50px] w-full border-4 border-ink bg-paper px-4 outline-none" required>
+          </div>
+          <div>
+            <label class="block text-xs font-black uppercase tracking-[0.22em]" for="slotTime">Time</label>
+            <input id="slotTime" class="mt-2 min-h-[50px] w-full border-4 border-ink bg-paper px-4 outline-none" placeholder="10:30 AM" required>
+          </div>
+          <div>
+            <label class="block text-xs font-black uppercase tracking-[0.22em]" for="slotVenue">Venue</label>
+            <input id="slotVenue" class="mt-2 min-h-[50px] w-full border-4 border-ink bg-paper px-4 outline-none" required>
+          </div>
+          <div>
+            <label class="block text-xs font-black uppercase tracking-[0.22em]" for="slotArea">Area</label>
+            <input id="slotArea" class="mt-2 min-h-[50px] w-full border-4 border-ink bg-paper px-4 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-black uppercase tracking-[0.22em]" for="slotNeeds">Needs</label>
+            <input id="slotNeeds" class="mt-2 min-h-[50px] w-full border-4 border-ink bg-paper px-4 outline-none" value="Needs attorney & lender" required>
+          </div>
+          <div>
+            <label class="block text-xs font-black uppercase tracking-[0.22em]" for="slotStatus">Status</label>
+            <select id="slotStatus" class="mt-2 min-h-[50px] w-full border-4 border-ink bg-paper px-4 outline-none">
+              <option value="available">Available</option>
+              <option value="booked">Booked</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-black uppercase tracking-[0.22em]" for="slotSortOrder">Sort order</label>
+            <input id="slotSortOrder" type="number" class="mt-2 min-h-[50px] w-full border-4 border-ink bg-paper px-4 outline-none" value="0">
+          </div>
+          <div class="flex flex-wrap gap-3 pt-2">
+            <button type="submit" class="border-4 border-ink bg-rust px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-card transition hover:-translate-y-1">Save slot</button>
+            <button type="button" id="resetSlotFormBtn" class="border-4 border-ink bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] shadow-card transition hover:-translate-y-1">Reset</button>
+          </div>
+        </form>
+        <p id="slotStatusText" class="mt-4 text-sm font-bold text-black/70">No changes yet.</p>
+      </section>
+
+      <section class="grid gap-4">
+        <section class="border-4 border-ink bg-white p-5 shadow-card md:p-6">
+          <div class="flex items-center justify-between gap-3 border-b-4 border-ink pb-4">
+            <div>
+              <p class="text-xs font-black uppercase tracking-[0.24em] text-cobalt">Current slots</p>
+              <h2 class="mt-2 text-3xl font-black uppercase leading-none">Manage availability</h2>
+            </div>
+            <button id="refreshAdminBtn" class="border-4 border-ink bg-sand px-3 py-2 text-xs font-black uppercase tracking-[0.14em] shadow-card transition hover:-translate-y-1">Refresh</button>
+          </div>
+          <div id="adminSlotList" class="mt-4 grid gap-4"></div>
+        </section>
+
+        <section class="border-4 border-ink bg-white p-5 shadow-card md:p-6">
+          <div class="border-b-4 border-ink pb-4">
+            <p class="text-xs font-black uppercase tracking-[0.24em] text-rust">Registrations</p>
+            <h2 class="mt-2 text-3xl font-black uppercase leading-none">Booked attendees</h2>
+          </div>
+          <div class="mt-4 overflow-x-auto">
+            <table class="min-w-full border-collapse text-left text-sm">
+              <thead>
+                <tr>
+                  <th class="border-4 border-ink bg-paper px-3 py-2 font-black uppercase tracking-[0.14em]">Name</th>
+                  <th class="border-4 border-ink bg-paper px-3 py-2 font-black uppercase tracking-[0.14em]">Email</th>
+                  <th class="border-4 border-ink bg-paper px-3 py-2 font-black uppercase tracking-[0.14em]">Role</th>
+                  <th class="border-4 border-ink bg-paper px-3 py-2 font-black uppercase tracking-[0.14em]">Slot</th>
+                </tr>
+              </thead>
+              <tbody id="registrationTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const adminState = { slots: [], registrations: [] };
+
+    async function api(url, options = {}) {
+      const response = await fetch(url, {
+        credentials: "same-origin",
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error || "Request failed.");
+      }
+      return data;
+    }
+
+    function setSignedIn(isSignedIn) {
+      document.getElementById("loginPanel").classList.toggle("hidden", isSignedIn);
+      document.getElementById("adminPanel").classList.toggle("hidden", !isSignedIn);
+    }
+
+    function renderSlots() {
+      const list = document.getElementById("adminSlotList");
+      if (!adminState.slots.length) {
+        list.innerHTML = '<div class="border-4 border-dashed border-ink bg-paper p-5 text-sm leading-7 text-black/70">No slots found.</div>';
+        return;
+      }
+      list.innerHTML = adminState.slots.map((slot) => `
+        <article class="border-4 border-ink bg-paper p-4">
+          <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p class="text-xs font-black uppercase tracking-[0.16em] text-rust">${slot.date} · ${slot.time}</p>
+              <h3 class="mt-2 text-2xl font-black uppercase leading-tight">${slot.venue}</h3>
+              <p class="mt-2 text-sm font-bold uppercase tracking-[0.14em] text-black/60">${slot.area || "Area not listed"}</p>
+            </div>
+            <span class="border-4 border-ink ${slot.status === "booked" ? "bg-black text-white" : "bg-white"} px-3 py-2 text-xs font-black uppercase tracking-[0.14em]">${slot.status}</span>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <button type="button" data-edit-slot="${slot.id}" class="border-4 border-ink bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.14em] shadow-card transition hover:-translate-y-1">Edit</button>
+            <button type="button" data-delete-slot="${slot.id}" class="border-4 border-ink bg-rust px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-white shadow-card transition hover:-translate-y-1">Delete</button>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderRegistrations() {
+      const body = document.getElementById("registrationTableBody");
+      if (!adminState.registrations.length) {
+        body.innerHTML = '<tr><td colspan="4" class="border-4 border-ink bg-white px-3 py-4 text-sm text-black/70">No registrations yet.</td></tr>';
+        return;
+      }
+      body.innerHTML = adminState.registrations.map((registration) => `
+        <tr>
+          <td class="border-4 border-ink bg-white px-3 py-3 align-top">${registration.fullName}</td>
+          <td class="border-4 border-ink bg-white px-3 py-3 align-top">${registration.email}</td>
+          <td class="border-4 border-ink bg-white px-3 py-3 align-top">${registration.attendeeRole}</td>
+          <td class="border-4 border-ink bg-white px-3 py-3 align-top">${registration.slot.venue}<br><span class="text-xs text-black/65">${registration.slot.date} ${registration.slot.time}</span></td>
+        </tr>
+      `).join("");
+    }
+
+    function fillSlotForm(slot) {
+      document.getElementById("slotId").value = slot?.id || "";
+      document.getElementById("slotDate").value = slot?.date || "";
+      document.getElementById("slotTime").value = slot?.time || "";
+      document.getElementById("slotVenue").value = slot?.venue || "";
+      document.getElementById("slotArea").value = slot?.area || "";
+      document.getElementById("slotNeeds").value = slot?.needs || "Needs attorney & lender";
+      document.getElementById("slotStatus").value = slot?.status || "available";
+      document.getElementById("slotSortOrder").value = String(slot?.sortOrder ?? 0);
+    }
+
+    async function refreshAdminData() {
+      const [slotData, registrationData] = await Promise.all([
+        api("/api/admin/slots"),
+        api("/api/admin/registrations")
+      ]);
+      adminState.slots = slotData.slots || [];
+      adminState.registrations = registrationData.registrations || [];
+      renderSlots();
+      renderRegistrations();
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      try {
+        await api("/api/admin/login", {
+          method: "POST",
+          body: JSON.stringify({ pin: document.getElementById("adminPin").value })
+        });
+        setSignedIn(true);
+        document.getElementById("loginStatus").textContent = "Admin unlocked.";
+        await refreshAdminData();
+      } catch (error) {
+        document.getElementById("loginStatus").textContent = error.message;
+      }
+    });
+
+    document.getElementById("slotForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const id = document.getElementById("slotId").value;
+      const payload = {
+        eventDate: document.getElementById("slotDate").value,
+        eventTime: document.getElementById("slotTime").value,
+        venue: document.getElementById("slotVenue").value,
+        area: document.getElementById("slotArea").value,
+        needs: document.getElementById("slotNeeds").value,
+        status: document.getElementById("slotStatus").value,
+        sortOrder: Number(document.getElementById("slotSortOrder").value || 0)
+      };
+
+      try {
+        if (id) {
+          await api(`/api/admin/slots/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(payload)
+          });
+          document.getElementById("slotStatusText").textContent = "Slot updated.";
+        } else {
+          await api("/api/admin/slots", {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+          document.getElementById("slotStatusText").textContent = "Slot added.";
+        }
+        fillSlotForm(null);
+        await refreshAdminData();
+      } catch (error) {
+        document.getElementById("slotStatusText").textContent = error.message;
+      }
+    });
+
+    document.getElementById("resetSlotFormBtn").addEventListener("click", () => fillSlotForm(null));
+    document.getElementById("refreshAdminBtn").addEventListener("click", refreshAdminData);
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      try {
+        await api("/api/admin/logout", { method: "POST", body: JSON.stringify({}) });
+      } finally {
+        setSignedIn(false);
+      }
+    });
+
+    document.body.addEventListener("click", async (event) => {
+      const editButton = event.target.closest("[data-edit-slot]");
+      if (editButton) {
+        const slot = adminState.slots.find((item) => item.id === Number(editButton.dataset.editSlot));
+        if (slot) fillSlotForm(slot);
+        return;
+      }
+
+      const deleteButton = event.target.closest("[data-delete-slot]");
+      if (deleteButton) {
+        const slotId = Number(deleteButton.dataset.deleteSlot);
+        try {
+          await api(`/api/admin/slots/${slotId}`, { method: "DELETE" });
+          document.getElementById("slotStatusText").textContent = "Slot deleted.";
+          fillSlotForm(null);
+          await refreshAdminData();
+        } catch (error) {
+          document.getElementById("slotStatusText").textContent = error.message;
+        }
+      }
+    });
+
+    (async function init() {
+      try {
+        const session = await api("/api/admin/session");
+        if (session.authenticated) {
+          setSignedIn(true);
+          await refreshAdminData();
+        }
+      } catch {
+        setSignedIn(false);
+      }
+    })();
+  </script>
+</body>
+</html>

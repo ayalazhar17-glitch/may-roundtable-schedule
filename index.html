@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>May Roundtable Schedule</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            paper: "#f4efe6",
+            ink: "#161616",
+            rust: "#db5d36",
+            sand: "#ead8bc",
+            cobalt: "#4567ff",
+            sage: "#5d8f68",
+            blush: "#f5d6db"
+          },
+          boxShadow: {
+            brutal: "10px 10px 0 #161616",
+            card: "7px 7px 0 rgba(22,22,22,0.95)"
+          },
+          fontFamily: {
+            display: ['"Arial Black"', '"Helvetica Neue"', "sans-serif"],
+            body: ["Arial", '"Helvetica Neue"', "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .slot-card.selected { transform: translate(-4px, -4px); box-shadow: 11px 11px 0 #161616; }
+    .slot-card.booked { opacity: 0.56; filter: grayscale(0.08); }
+    .role-card.selected { background: #161616; color: #f4efe6; }
+    .modal-open { display: flex; }
+  </style>
+</head>
+<body class="bg-paper font-body text-ink">
+  <header class="border-b-4 border-ink bg-white">
+    <nav class="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-8">
+      <a href="#top" class="border-4 border-ink bg-sand px-3 py-2 text-xs font-black uppercase tracking-[0.2em] shadow-card">May Roundtable Schedule</a>
+      <div class="flex items-center gap-3">
+        <a href="#schedule" class="border-4 border-ink bg-white px-3 py-2 text-sm font-black uppercase tracking-[0.12em] shadow-card transition hover:-translate-y-1">Schedule</a>
+        <a href="/admin.html" class="border-4 border-ink bg-cobalt px-3 py-2 text-sm font-black uppercase tracking-[0.12em] text-white shadow-card transition hover:-translate-y-1">Admin</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top" class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 md:px-8 md:py-8">
+    <section class="grid gap-4 lg:grid-cols-[1.35fr_0.85fr]">
+      <header class="border-4 border-ink bg-white p-6 shadow-brutal md:p-8">
+        <p class="text-xs font-black uppercase tracking-[0.28em] text-rust">For attorneys and lenders</p>
+        <h1 class="mt-4 font-display text-5xl font-black uppercase leading-none md:text-7xl">Pick your date. Claim your seat. Stop the back-and-forth.</h1>
+        <p class="mt-5 max-w-2xl text-base leading-7 text-black/70 md:text-lg">
+          Every option below shows the venue, time, and staffing need up front. Choose one slot, add your details, and lock it before someone else does.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="#schedule" class="border-4 border-ink bg-rust px-5 py-3 text-sm font-black uppercase tracking-[0.15em] text-white shadow-card transition hover:-translate-y-1">Choose a slot</a>
+          <button id="copyPageBtn" class="border-4 border-ink bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.15em] shadow-card transition hover:-translate-y-1">Copy page link</button>
+        </div>
+      </header>
+
+      <aside class="grid gap-4">
+        <article class="border-4 border-ink bg-sand p-5 shadow-card">
+          <p class="text-xs font-black uppercase tracking-[0.24em]">Coverage requirement</p>
+          <h2 class="mt-3 text-3xl font-black uppercase leading-none">Each date needs attorney and lender coverage.</h2>
+          <p class="mt-3 text-sm leading-6 text-black/70">That rule stays visible on every slot so people know exactly what they’re committing to.</p>
+        </article>
+        <div class="grid grid-cols-2 gap-4">
+          <article class="border-4 border-ink bg-white p-5 shadow-card">
+            <p class="text-xs font-black uppercase tracking-[0.24em]">Open slots</p>
+            <p id="slotCount" class="mt-3 text-4xl font-black">0</p>
+          </article>
+          <article class="border-4 border-ink bg-white p-5 shadow-card">
+            <p class="text-xs font-black uppercase tracking-[0.24em]">Booking rule</p>
+            <p class="mt-3 text-lg font-black uppercase leading-tight">One slot per registration</p>
+          </article>
+        </div>
+      </aside>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-3">
+      <article class="border-4 border-ink bg-white p-5 shadow-card">
+        <p class="text-xs font-black uppercase tracking-[0.24em] text-cobalt">Step 1</p>
+        <h2 class="mt-3 text-2xl font-black uppercase leading-tight">Choose one date.</h2>
+        <p class="mt-3 text-sm leading-6 text-black/70">Every slot is listed in plain language with venue, area, time, and current availability.</p>
+      </article>
+      <article class="border-4 border-ink bg-white p-5 shadow-card">
+        <p class="text-xs font-black uppercase tracking-[0.24em] text-rust">Step 2</p>
+        <h2 class="mt-3 text-2xl font-black uppercase leading-tight">Add your details.</h2>
+        <p class="mt-3 text-sm leading-6 text-black/70">The registration form appears after you select a slot, so the flow stays focused and fast.</p>
+      </article>
+      <article class="border-4 border-ink bg-white p-5 shadow-card">
+        <p class="text-xs font-black uppercase tracking-[0.24em] text-sage">Step 3</p>
+        <h2 class="mt-3 text-2xl font-black uppercase leading-tight">Get confirmation instantly.</h2>
+        <p class="mt-3 text-sm leading-6 text-black/70">Booked slots lock immediately, and the confirmation panel gives you a clean record of what you picked.</p>
+      </article>
+    </section>
+
+    <section id="schedule" class="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+      <section class="border-4 border-ink bg-white p-5 shadow-brutal md:p-6">
+        <div class="flex flex-col gap-3 border-b-4 border-ink pb-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p class="text-xs font-black uppercase tracking-[0.24em] text-rust">Available schedule</p>
+            <h2 class="mt-2 text-3xl font-black uppercase leading-none md:text-4xl">Open roundtable dates</h2>
+          </div>
+          <p class="max-w-sm text-sm leading-6 text-black/70">Booked slots are marked unavailable right away so no one can double-book the same meeting.</p>
+        </div>
+        <div id="slotList" class="mt-5 grid gap-4"></div>
+      </section>
+
+      <aside class="grid gap-4">
+        <section class="border-4 border-ink bg-white p-5 shadow-card md:p-6">
+          <p class="text-xs font-black uppercase tracking-[0.24em] text-cobalt">Registration</p>
+          <div id="selectedState" class="mt-4 border-4 border-dashed border-ink bg-paper p-4 text-sm leading-7 text-black/70">Select one available slot to open the registration form.</div>
+
+          <form id="bookingForm" class="mt-5 hidden grid gap-3">
+            <div>
+              <label class="block text-xs font-black uppercase tracking-[0.22em]" for="fullName">Full name</label>
+              <input id="fullName" class="mt-2 min-h-[52px] w-full border-4 border-ink bg-white px-4 outline-none transition focus:-translate-y-1" required>
+            </div>
+            <div>
+              <label class="block text-xs font-black uppercase tracking-[0.22em]" for="emailAddress">Email address</label>
+              <input id="emailAddress" type="email" class="mt-2 min-h-[52px] w-full border-4 border-ink bg-white px-4 outline-none transition focus:-translate-y-1" required>
+            </div>
+            <div>
+              <label class="block text-xs font-black uppercase tracking-[0.22em]" for="companyRole">Company / role</label>
+              <input id="companyRole" class="mt-2 min-h-[52px] w-full border-4 border-ink bg-white px-4 outline-none transition focus:-translate-y-1" placeholder="Optional">
+            </div>
+            <div>
+              <label class="block text-xs font-black uppercase tracking-[0.22em]">Attending as</label>
+              <div id="roleList" class="mt-3 grid gap-3 sm:grid-cols-3"></div>
+            </div>
+            <div>
+              <label class="block text-xs font-black uppercase tracking-[0.22em]" for="notes">Notes</label>
+              <textarea id="notes" class="mt-2 min-h-[110px] w-full border-4 border-ink bg-white px-4 py-3 outline-none transition focus:-translate-y-1" placeholder="Optional context"></textarea>
+            </div>
+            <div class="flex flex-wrap gap-3 pt-2">
+              <button type="submit" class="border-4 border-ink bg-rust px-4 py-3 text-sm font-black uppercase tracking-[0.15em] text-white shadow-card transition hover:-translate-y-1">Book slot</button>
+              <button type="button" id="viewDetailsBtn" class="border-4 border-ink bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.15em] shadow-card transition hover:-translate-y-1">View details</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="border-4 border-ink bg-sand p-5 shadow-card md:p-6">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="text-xs font-black uppercase tracking-[0.24em] text-rust">Confirmation</p>
+              <h3 class="mt-2 text-2xl font-black uppercase leading-tight">What gets saved</h3>
+            </div>
+            <button id="copySummaryBtn" class="border-4 border-ink bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.15em] shadow-card transition hover:-translate-y-1">Copy</button>
+          </div>
+          <div id="confirmationBox" class="mt-4 border-4 border-ink bg-white p-4 text-sm leading-7">No slot selected yet.</div>
+          <p id="statusText" class="mt-4 text-sm font-bold text-black/70">No booking submitted yet.</p>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="mx-auto w-full max-w-7xl px-4 pb-8 md:px-8">
+    <div class="border-4 border-ink bg-white px-5 py-4 text-sm leading-6 shadow-card">
+      Organizer notifications and slot locking are handled by the backend. If SMTP or Twilio credentials are configured, this page can email and text the organizer automatically after each booking.
+    </div>
+  </footer>
+
+  <div id="modalOverlay" class="fixed inset-0 hidden items-center justify-center bg-black/60 px-4">
+    <div class="w-full max-w-2xl border-4 border-ink bg-paper p-5 shadow-brutal md:p-6">
+      <div class="flex items-start justify-between gap-4 border-b-4 border-ink pb-4">
+        <div>
+          <p class="text-xs font-black uppercase tracking-[0.24em] text-rust">Slot details</p>
+          <h2 id="modalTitle" class="mt-2 text-3xl font-black uppercase leading-none"></h2>
+        </div>
+        <button id="closeModalBtn" class="border-4 border-ink bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.16em] shadow-card">Close</button>
+      </div>
+      <div id="modalBody" class="mt-5 grid gap-4 md:grid-cols-2"></div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      slots: [],
+      selectedSlotId: null,
+      selectedRole: "attorney"
+    };
+
+    const roles = [
+      { id: "attorney", label: "Attorney" },
+      { id: "lender", label: "Lender" },
+      { id: "both", label: "Attorney + Lender" }
+    ];
+
+    function formatDate(value) {
+      return new Date(`${value}T09:00:00`).toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "long",
+        day: "numeric"
+      });
+    }
+
+    function currentSlot() {
+      return state.slots.find((slot) => slot.id === state.selectedSlotId) || null;
+    }
+
+    function confirmationText(slot, role, fullName = "Full Name", email = "email@example.com", companyRole = "", notes = "") {
+      const lines = [
+        `Selected slot: ${slot.venue}`,
+        `Date: ${formatDate(slot.date)}`,
+        `Time: ${slot.time}`,
+        `Area: ${slot.area || "Not listed"}`,
+        `Coverage need: ${slot.needs}`,
+        `Attending as: ${role.label}`,
+        `Full name: ${fullName}`,
+        `Email: ${email}`
+      ];
+      if (companyRole) lines.push(`Company / role: ${companyRole}`);
+      if (notes) lines.push(`Notes: ${notes}`);
+      return lines.join("\\n");
+    }
+
+    async function fetchSlots() {
+      const response = await fetch("/api/slots");
+      const data = await response.json();
+      state.slots = data.slots || [];
+      const available = state.slots.find((slot) => slot.status === "available");
+      if (!state.selectedSlotId || !state.slots.some((slot) => slot.id === state.selectedSlotId)) {
+        state.selectedSlotId = available ? available.id : null;
+      }
+      render();
+    }
+
+    function renderSlotCards() {
+      const list = document.getElementById("slotList");
+      if (!state.slots.length) {
+        list.innerHTML = '<div class="border-4 border-dashed border-ink bg-paper p-5 text-sm leading-7 text-black/70">No meeting slots are available right now.</div>';
+        return;
+      }
+
+      list.innerHTML = state.slots.map((slot) => {
+        const isSelected = slot.id === state.selectedSlotId;
+        const isBooked = slot.status === "booked";
+        return `
+          <button type="button" data-slot="${slot.id}" ${isBooked ? "disabled" : ""} class="slot-card ${isSelected ? "selected" : ""} ${isBooked ? "booked cursor-not-allowed" : "cursor-pointer"} border-4 border-ink bg-white p-5 text-left shadow-card transition hover:-translate-x-1 hover:-translate-y-1">
+            <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <div class="inline-flex border-4 border-ink bg-sand px-3 py-1 text-xs font-black uppercase tracking-[0.18em]">${formatDate(slot.date)}</div>
+                <h3 class="mt-4 text-2xl font-black uppercase leading-tight">${slot.venue}</h3>
+                <p class="mt-2 text-sm font-bold uppercase tracking-[0.14em] text-black/60">${slot.area || "Location to confirm"}</p>
+              </div>
+              <div class="flex flex-wrap gap-2 md:max-w-[220px] md:justify-end">
+                <span class="border-4 border-ink bg-cobalt px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-white">${slot.time}</span>
+                <span class="border-4 border-ink ${isBooked ? "bg-black text-white" : "bg-blush"} px-3 py-1 text-xs font-black uppercase tracking-[0.18em]">${isBooked ? "Booked" : slot.needs}</span>
+              </div>
+            </div>
+            <div class="mt-5 border-t-4 border-ink pt-4 text-sm leading-6 text-black/70">
+              ${isBooked ? "This slot is already taken." : "This slot is still open. Book it now to lock it."}
+            </div>
+          </button>
+        `;
+      }).join("");
+
+      document.getElementById("slotCount").textContent = String(state.slots.filter((slot) => slot.status === "available").length);
+    }
+
+    function renderRoleCards() {
+      const list = document.getElementById("roleList");
+      list.innerHTML = roles.map((role) => `
+        <button type="button" data-role="${role.id}" class="role-card ${state.selectedRole === role.id ? "selected" : ""} border-4 border-ink bg-white px-4 py-3 text-left shadow-card transition hover:-translate-y-1">
+          <span class="block text-sm font-black uppercase tracking-[0.14em]">${role.label}</span>
+        </button>
+      `).join("");
+    }
+
+    function renderSelectedState() {
+      const slot = currentSlot();
+      const form = document.getElementById("bookingForm");
+      if (!slot || slot.status === "booked") {
+        document.getElementById("selectedState").textContent = "Select one available slot to open the registration form.";
+        form.classList.add("hidden");
+        return;
+      }
+
+      document.getElementById("selectedState").innerHTML = `
+        <p class="text-xs font-black uppercase tracking-[0.22em] text-rust">Selected slot</p>
+        <h3 class="mt-3 text-2xl font-black uppercase leading-tight">${slot.venue}</h3>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          <div class="border-4 border-ink bg-white p-3">
+            <p class="text-xs font-black uppercase tracking-[0.16em]">Date</p>
+            <p class="mt-2 text-sm font-bold">${formatDate(slot.date)}</p>
+          </div>
+          <div class="border-4 border-ink bg-white p-3">
+            <p class="text-xs font-black uppercase tracking-[0.16em]">Time</p>
+            <p class="mt-2 text-sm font-bold">${slot.time}</p>
+          </div>
+        </div>
+      `;
+      form.classList.remove("hidden");
+    }
+
+    function renderConfirmationBox(message = "") {
+      const slot = currentSlot();
+      const role = roles.find((entry) => entry.id === state.selectedRole) || roles[0];
+      if (!slot || slot.status === "booked") {
+        document.getElementById("confirmationBox").textContent = "No slot selected yet.";
+        if (message) document.getElementById("statusText").textContent = message;
+        return;
+      }
+
+      const fullName = document.getElementById("fullName")?.value.trim() || "Full Name";
+      const email = document.getElementById("emailAddress")?.value.trim() || "email@example.com";
+      const companyRole = document.getElementById("companyRole")?.value.trim() || "";
+      const notes = document.getElementById("notes")?.value.trim() || "";
+      document.getElementById("confirmationBox").textContent = confirmationText(slot, role, fullName, email, companyRole, notes);
+      document.getElementById("statusText").textContent = message || "Nothing has been submitted yet.";
+    }
+
+    function renderModal() {
+      const slot = currentSlot();
+      if (!slot) return;
+      document.getElementById("modalTitle").textContent = slot.venue;
+      document.getElementById("modalBody").innerHTML = `
+        <article class="border-4 border-ink bg-white p-4">
+          <p class="text-xs font-black uppercase tracking-[0.16em] text-rust">When</p>
+          <p class="mt-3 text-xl font-black uppercase">${formatDate(slot.date)}</p>
+          <p class="mt-2 text-base font-bold">${slot.time}</p>
+        </article>
+        <article class="border-4 border-ink bg-white p-4">
+          <p class="text-xs font-black uppercase tracking-[0.16em] text-cobalt">Where</p>
+          <p class="mt-3 text-xl font-black uppercase">${slot.area || "Area not listed"}</p>
+          <p class="mt-2 text-base font-bold">${slot.venue}</p>
+        </article>
+        <article class="border-4 border-ink bg-white p-4 md:col-span-2">
+          <p class="text-xs font-black uppercase tracking-[0.16em] text-sage">Coverage</p>
+          <p class="mt-3 text-sm leading-7 text-black/75">${slot.needs}</p>
+        </article>
+      `;
+    }
+
+    function render() {
+      renderSlotCards();
+      renderRoleCards();
+      renderSelectedState();
+      renderConfirmationBox();
+      renderModal();
+    }
+
+    async function bookSlot(event) {
+      event.preventDefault();
+      const slot = currentSlot();
+      if (!slot || slot.status === "booked") return;
+
+      const payload = {
+        slotId: slot.id,
+        fullName: document.getElementById("fullName").value.trim(),
+        email: document.getElementById("emailAddress").value.trim(),
+        companyRole: document.getElementById("companyRole").value.trim(),
+        attendeeRole: state.selectedRole,
+        notes: document.getElementById("notes").value.trim()
+      };
+
+      const response = await fetch("/api/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        renderConfirmationBox(data.error || "Booking failed.");
+        return;
+      }
+
+      await fetchSlots();
+      renderConfirmationBox(`Confirmed for ${data.registration.slot.venue} on ${formatDate(data.registration.slot.date)} at ${data.registration.slot.time}.`);
+      document.getElementById("modalOverlay").classList.remove("hidden");
+      document.getElementById("modalOverlay").classList.add("flex");
+    }
+
+    function copyText(text, successMessage) {
+      const fallback = () => {
+        document.getElementById("statusText").textContent = "Copy is ready, but your browser blocked automatic clipboard access.";
+      };
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        fallback();
+        return;
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        document.getElementById("statusText").textContent = successMessage;
+      }).catch(fallback);
+    }
+
+    document.body.addEventListener("click", (event) => {
+      const slotButton = event.target.closest("[data-slot]");
+      if (slotButton && !slotButton.disabled) {
+        state.selectedSlotId = Number(slotButton.dataset.slot);
+        render();
+        return;
+      }
+
+      const roleButton = event.target.closest("[data-role]");
+      if (roleButton) {
+        state.selectedRole = roleButton.dataset.role;
+        render();
+      }
+    });
+
+    document.getElementById("bookingForm").addEventListener("submit", bookSlot);
+    document.getElementById("fullName").addEventListener("input", () => renderConfirmationBox());
+    document.getElementById("emailAddress").addEventListener("input", () => renderConfirmationBox());
+    document.getElementById("companyRole").addEventListener("input", () => renderConfirmationBox());
+    document.getElementById("notes").addEventListener("input", () => renderConfirmationBox());
+    document.getElementById("copyPageBtn").addEventListener("click", () => copyText(window.location.href, "Page link copied."));
+    document.getElementById("copySummaryBtn").addEventListener("click", () => copyText(document.getElementById("confirmationBox").textContent, "Confirmation summary copied."));
+    document.getElementById("viewDetailsBtn").addEventListener("click", () => {
+      document.getElementById("modalOverlay").classList.remove("hidden");
+      document.getElementById("modalOverlay").classList.add("flex");
+    });
+    document.getElementById("closeModalBtn").addEventListener("click", () => {
+      document.getElementById("modalOverlay").classList.add("hidden");
+      document.getElementById("modalOverlay").classList.remove("flex");
+    });
+    document.getElementById("modalOverlay").addEventListener("click", (event) => {
+      if (event.target.id === "modalOverlay") {
+        document.getElementById("modalOverlay").classList.add("hidden");
+        document.getElementById("modalOverlay").classList.remove("flex");
+      }
+    });
+
+    fetchSlots();
+  </script>
+</body>
+</html>
